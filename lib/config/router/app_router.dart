@@ -11,7 +11,7 @@ final goRouterProvider = Provider((ref) {
   final authNotifierProvider = ref.watch(authProvider.notifier);
 
   final appRouter = GoRouter(
-    initialLocation: '/register',
+    initialLocation: '/splash',
     routes: [
       ///* Auth Routes
       GoRoute(

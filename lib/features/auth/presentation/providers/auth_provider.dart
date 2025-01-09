@@ -31,8 +31,7 @@ class AuthNotifier extends Notifier<AuthState> implements Listenable {
 
     try {
       final user = await authRepository.login(email, password);
-      _setLoggedInUser(user);
-      await storage_service.setKeyValue<String>("user_token", user.token);
+      await _setLoggedInUser(user);
     } on CustomError catch (e) {
       logout(e.message);
     } catch (e) {
@@ -46,7 +45,8 @@ class AuthNotifier extends Notifier<AuthState> implements Listenable {
 
     try {
       final user = await authRepository.register(email, password, fullname);
-      _setLoggedInUser(user);
+      await _setLoggedInUser(user);
+      // await storage_service.setKeyValue<String>("user_token", user.token);
     } on CustomError catch (e) {
       logout(e.message);
     } catch (e) {
@@ -81,7 +81,8 @@ class AuthNotifier extends Notifier<AuthState> implements Listenable {
     }
   }
 
-  _setLoggedInUser(User user) {
+  _setLoggedInUser(User user) async {
+    await storage_service.setKeyValue<String>("user_token", user.token);
     state = state.copyWith(
       status: AuthStatus.authenticated,
       user: user,

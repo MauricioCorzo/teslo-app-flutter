@@ -1,14 +1,16 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:teslo_shop/config/constants/environment.dart';
 import 'package:teslo_shop/features/auth/domain/domain.dart';
 import 'package:teslo_shop/features/auth/infrastructure/errors/auth_errors.dart';
 import 'package:teslo_shop/features/auth/infrastructure/mappers/user_mapper.dart';
-import "dart:developer" as dev;
+// import "dart:developer" as dev;
 
 class AuthDatasourceImpl implements AuthDatasource {
   final _dio = Dio(BaseOptions(
-    baseUrl: Environment.API_URL,
-  ));
+      baseUrl: Environment.API_URL, connectTimeout: Duration(seconds: 6)));
 
   @override
   Future<User> checkAuthStatus(String token) async {
@@ -20,6 +22,13 @@ class AuthDatasourceImpl implements AuthDatasource {
 
       final user = UserMapper.json_to_user(response.data);
       return user;
+    } on HttpException catch (_) {
+      throw CustomError("No internet connection", 408);
+    } on SocketException catch (_) {
+      throw CustomError(
+          "No internet connection or server is down temporarly", 408);
+    } on TimeoutException catch (_) {
+      throw CustomError("Request timeout", 408);
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
         throw CustomError(e.response?.data["message"], 401);
@@ -42,6 +51,9 @@ class AuthDatasourceImpl implements AuthDatasource {
       final user = UserMapper.json_to_user(response.data);
 
       return user;
+    } on SocketException catch (_) {
+      throw CustomError(
+          "No internet connection or server is down temporarly", 408);
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
         throw CustomError(e.response?.data["message"], 401);
@@ -63,7 +75,7 @@ class AuthDatasourceImpl implements AuthDatasource {
           data: {"email": email, "password": password, "fullName": fullname});
 
       final user = UserMapper.json_to_user(response.data);
-      dev.debugger();
+
       return user;
     } catch (e) {
       throw Exception();

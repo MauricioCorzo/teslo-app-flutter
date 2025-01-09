@@ -30,8 +30,8 @@ class RegisterScreen extends StatelessWidget {
               children: [
                 IconButton(
                     onPressed: () {
-                      if (!context.canPop()) return;
-                      context.pop();
+                      // if (!context.canPop()) return;
+                      context.pushReplacement("/login");
                     },
                     icon: const Icon(Icons.arrow_back_rounded,
                         size: 40, color: Colors.white)),
@@ -46,7 +46,7 @@ class RegisterScreen extends StatelessWidget {
             const SizedBox(height: 50),
 
             Container(
-              height: size.height - 260, // 80 los dos sizebox y 100 el ícono
+              // height: size.height - 260, // 80 los dos sizebox y 100 el ícono
               width: double.infinity,
               decoration: BoxDecoration(
                 color: scaffoldBackgroundColor,
@@ -90,6 +90,7 @@ class _RegisterForm extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 50),
       child: Column(
+        // mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(height: 50),
           Text('Nueva cuenta', style: textStyles.titleMedium),
@@ -159,7 +160,7 @@ class _RegisterForm extends ConsumerWidget {
                   child: const Text('Ingresa aquí'))
             ],
           ),
-          const Spacer(flex: 1),
+          // const Spacer(flex: 1),
         ],
       ),
     );

@@ -117,13 +117,13 @@ class _LoginForm extends ConsumerWidget {
                           ref.read(loginFormProvider.notifier).onFormSubmit(),
                         }),
           ),
-          const Spacer(flex: 2),
+          const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text('¿No tienes cuenta?'),
               TextButton(
-                  onPressed: () => context.push('/register'),
+                  onPressed: () => context.pushReplacement('/register'),
                   child: const Text('Crea una aquí'))
             ],
           ),

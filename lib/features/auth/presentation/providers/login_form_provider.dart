@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:formz/formz.dart';
 import 'package:teslo_shop/features/auth/presentation/providers/auth_provider.dart';
 import 'package:teslo_shop/features/shared/shared.dart';
-import 'package:teslo_shop/helpers/logger.dart';
 
 final loginFormProvider =
     StateNotifierProvider.autoDispose<LoginFormNotifier, LoginFormState>((ref) {
@@ -10,7 +9,10 @@ final loginFormProvider =
   return LoginFormNotifier(loginUserCallback: login_user_callback);
 });
 
-typedef LoginUserCallback = Future<void> Function(String, String);
+typedef LoginUserCallback = Future<void> Function(
+  String email,
+  String password,
+);
 
 class LoginFormNotifier extends StateNotifier<LoginFormState> {
   final LoginUserCallback loginUserCallback;
@@ -35,7 +37,6 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
   }
 
   onFormSubmit() async {
-    LoggerPrint.info('submitting form');
     _touchEveryField();
 
     if (!state.isValid) return;
@@ -47,7 +48,6 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
     final password = state.password.value;
 
     await loginUserCallback(email, password);
-    LoggerPrint.info(state);
 
     state = state.copyWith(
       isPosting: false,

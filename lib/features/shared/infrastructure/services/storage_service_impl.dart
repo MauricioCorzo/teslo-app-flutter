@@ -20,7 +20,7 @@ class SharedPreferencesStorageServiceImpl implements StorageService {
   @override
   Future<bool> removeKey(String key) async {
     final prefs = await getSharedPreference();
-    return prefs.remove(key);
+    return await prefs.remove(key);
   }
 
   @override
@@ -28,8 +28,8 @@ class SharedPreferencesStorageServiceImpl implements StorageService {
     final prefs = await getSharedPreference();
 
     return switch (T) {
-      String => prefs.setString(key, value as String),
-      int => prefs.setInt(key, value as int),
+      String => await prefs.setString(key, value as String),
+      int => await prefs.setInt(key, value as int),
       _ => throw Exception('Type not implemented'),
     };
   }
