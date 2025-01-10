@@ -92,6 +92,9 @@ class _LoginForm extends ConsumerWidget {
                 : null,
             onChanged: (value) =>
                 ref.read(loginFormProvider.notifier).onEmailChange(value),
+            onFieldSubmitted: (_) {
+              ref.read(loginFormProvider.notifier).onFormSubmit();
+            },
           ),
           const SizedBox(height: 30),
           CustomTextFormField(
@@ -102,6 +105,9 @@ class _LoginForm extends ConsumerWidget {
                 : null,
             onChanged: (value) =>
                 ref.read(loginFormProvider.notifier).onPasswordChange(value),
+            onFieldSubmitted: (_) {
+              ref.read(loginFormProvider.notifier).onFormSubmit();
+            },
           ),
           const SizedBox(height: 30),
           SizedBox(
