@@ -45,7 +45,7 @@ class _ProductsViewState extends ConsumerState {
   void initState() {
     super.initState();
 
-    ref.read(productsProvider.notifier).loadNextPage();
+    // ref.read(productsProvider.notifier).loadNextPage();
 
     scrollController.addListener(() {
       if (scrollController.position.pixels + 400 >=
@@ -64,52 +64,60 @@ class _ProductsViewState extends ConsumerState {
   @override
   Widget build(BuildContext context) {
     final productsState = ref.watch(productsProvider);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      child: MasonryGridView.count(
-        addAutomaticKeepAlives: true,
-        cacheExtent: 4000.0,
-        controller: scrollController,
-        physics: const BouncingScrollPhysics(),
-        shrinkWrap: true,
-        crossAxisCount: 2,
-        mainAxisSpacing: 20,
-        crossAxisSpacing: 35,
-        itemCount: productsState.products.length,
-        itemBuilder: (context, index) {
-          final product = productsState.products[index];
-          return GestureDetector(
-            onTap: () => context.push("/product/${product.id}"),
-            child: ProductCard(product: product),
-          );
-        },
-      ),
-      // GridView.custom(
-      //   controller: scrollController,
-      //   physics: BouncingScrollPhysics(),
-      //   shrinkWrap: true,
-      //   gridDelegate: SliverQuiltedGridDelegate(
-      //     crossAxisCount: 4,
-      //     mainAxisSpacing: 20,
-      //     crossAxisSpacing: 15,
-      //     repeatPattern: QuiltedGridRepeatPattern.inverted,
-      //     pattern: const [
-      //       QuiltedGridTile(5, 2),
-      //       QuiltedGridTile(2, 1),
-      //       QuiltedGridTile(2, 1),
-      //       QuiltedGridTile(3, 2),
-      //     ],
-      //   ),
-      //   childrenDelegate: SliverChildBuilderDelegate(
-      //     childCount: productsState.products.length,
-      //     (context, index) {
-      //       final product = productsState.products[index];
-      //       // return Tile(index: index);
-      //       return ProductCard(product: product);
-      //     },
-      //   ),
-      // ),
-    );
+
+    return productsState.when(
+        skipLoadingOnReload: true,
+        loading: () => const Center(
+                child: CircularProgressIndicator(
+              color: Colors.red,
+            )),
+        error: (error, _) => Center(child: Text("Error: $error")),
+        data: (productsState) => Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: MasonryGridView.count(
+                addAutomaticKeepAlives: true,
+                cacheExtent: 4000.0,
+                controller: scrollController,
+                physics: const BouncingScrollPhysics(),
+                shrinkWrap: true,
+                crossAxisCount: 2,
+                mainAxisSpacing: 20,
+                crossAxisSpacing: 35,
+                itemCount: productsState.products.length,
+                itemBuilder: (context, index) {
+                  final product = productsState.products[index];
+                  return GestureDetector(
+                    onTap: () => context.push("/product/${product.id}"),
+                    child: ProductCard(product: product),
+                  );
+                },
+              ),
+              // GridView.custom(
+              //   controller: scrollController,
+              //   physics: BouncingScrollPhysics(),
+              //   shrinkWrap: true,
+              //   gridDelegate: SliverQuiltedGridDelegate(
+              //     crossAxisCount: 4,
+              //     mainAxisSpacing: 20,
+              //     crossAxisSpacing: 15,
+              //     repeatPattern: QuiltedGridRepeatPattern.inverted,
+              //     pattern: const [
+              //       QuiltedGridTile(5, 2),
+              //       QuiltedGridTile(2, 1),
+              //       QuiltedGridTile(2, 1),
+              //       QuiltedGridTile(3, 2),
+              //     ],
+              //   ),
+              //   childrenDelegate: SliverChildBuilderDelegate(
+              //     childCount: productsState.products.length,
+              //     (context, index) {
+              //       final product = productsState.products[index];
+              //       // return Tile(index: index);
+              //       return ProductCard(product: product);
+              //     },
+              //   ),
+              // ),
+            ));
   }
 }
 

@@ -2,43 +2,119 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:teslo_shop/features/products/domain/entities/product.dart';
 import 'package:teslo_shop/features/products/domain/repositories/products_repository.dart';
 import 'package:teslo_shop/features/products/presentation/providers/products_repository_provider.dart';
+import 'package:teslo_shop/helpers/logger.dart';
 
-final productsProvider =
-    NotifierProvider<ProductsNotifier, ProductsState>(ProductsNotifier.new);
+final productsProvider = AsyncNotifierProvider<ProductsNotifier, ProductsState>(
+    ProductsNotifier.new);
 
-class ProductsNotifier extends Notifier<ProductsState> {
+class ProductsNotifier extends AsyncNotifier<ProductsState> {
   late final ProductsRepository _productsRepository;
   @override
-  ProductsState build() {
+  Future<ProductsState> build() {
     this._productsRepository = ref.watch(productsRepositoryProvider);
 
-    state = ProductsState();
-    loadNextPage();
-    return state;
+    return loadInitPage();
+  }
+
+  Future<ProductsState> loadInitPage() async {
+    await Future.delayed(Duration(seconds: 3));
+    final products = await _productsRepository.getProductsByPage(
+      limit: 10,
+      offset: 0,
+    );
+
+    return ProductsState(
+      isLastPage: products.isEmpty,
+      limit: 10,
+      offset: 10,
+      isLoading: false,
+      products: products,
+    );
   }
 
   Future<void> loadNextPage() async {
-    if (state.isLoading || state.isLastPage) return;
+    if (state.isLoading || state.value?.isLastPage == true) return;
 
-    state = state.copyWith(isLoading: true);
+    state = AsyncLoading();
+    final previousState = state.valueOrNull;
+    LoggerPrint.info(previousState);
+    LoggerPrint.error(
+        "isLoading: ${state.isLoading}, isRefresh: ${state.isRefreshing}");
 
+    await Future.delayed(Duration(seconds: 3));
     final products = await _productsRepository.getProductsByPage(
-      limit: state.limit,
-      offset: state.offset,
+      limit: state.requireValue.limit,
+      offset: state.requireValue.offset,
     );
-
-    if (products.isEmpty) {
-      state = state.copyWith(isLastPage: true, isLoading: false);
-    } else {
-      state = state.copyWith(
-        offset: state.offset + state.limit,
+    state = AsyncValue.data(
+      state.requireValue.copyWith(
+        offset: state.requireValue.offset + state.requireValue.limit,
         isLoading: false,
         isLastPage: false,
-        products: [...state.products, ...products],
-      );
-    }
+        products: [...state.requireValue.products, ...products],
+      ),
+    );
+    LoggerPrint.error(
+        "isLoading: ${state.isLoading}, isRefresh: ${state.isRefreshing}");
+    // if (previousState == null) return;
+
+    // if (products.isEmpty) {
+    //   state = await AsyncValue.guard(() async =>
+    //       previousState.copyWith(isLastPage: true, isLoading: false));
+    // } else {
+    //   state = state.copyWithPrevious(
+    //       AsyncValue.data(
+    //         previousState.copyWith(
+    //           offset: previousState.offset + previousState.limit,
+    //           isLoading: false,
+    //           isLastPage: false,
+    //           products: [...previousState.products, ...products],
+    //         ),
+    //       ),
+    //       isRefresh: false);
+    //   // state = await AsyncValue.guard(() async => previousState.copyWith(
+    //   //       offset: previousState.offset + previousState.limit,
+    //   //       isLoading: false,
+    //   //       isLastPage: false,
+    //   //       products: [...previousState.products, ...products],
+    //   //     ));
+    // }
   }
 }
+
+// class ProductsNotifier extends Notifier<ProductsState> {
+//   late final ProductsRepository _productsRepository;
+//   @override
+//   ProductsState build() {
+//     this._productsRepository = ref.watch(productsRepositoryProvider);
+
+//     state = ProductsState();
+//     loadNextPage();
+//     return state;
+//   }
+
+//   Future<void> loadNextPage() async {
+//     if (state.isLoading || state.isLastPage) return;
+
+//     state = state.copyWith(isLoading: true);
+
+//     final products = await _productsRepository.getProductsByPage(
+//       limit: state.limit,
+//       offset: state.offset,
+//     );
+
+//     if (products.isEmpty) {
+//       state = state.copyWith(isLastPage: true, isLoading: false);
+//     } else {
+//       state = state.copyWith(
+//         offset: state.offset + state.limit,
+//         isLoading: false,
+//         isLastPage: false,
+//         products: [...state.products, ...products],
+//       );
+//     }
+//   }
+// }
 
 class ProductsState {
   final bool isLastPage;
